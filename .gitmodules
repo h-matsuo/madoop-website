@@ -1,0 +1,3 @@
+[submodule "madoop"]
+	path = madoop
+	url = git@github.com:h-matsuo/madoop.git
