@@ -10,6 +10,10 @@
     body {
       padding: 10px;
     }
+    #status-wrapper {
+      font-size: 2rem;
+      font-weight: bold;
+    }
     table {
       border-collapse: collapse;
     }
@@ -27,18 +31,19 @@
   This is a demo page for <a href="https://github.com/h-matsuo/madoop">Madoop</a>.
 </p>
 
-<h2>Register Task</h2>
+<h2>Register Your Job</h2>
 
-<p>You can try to register your own task:
-  <ul>
-    <li><a href="register.html">Task Registration</a></li>
-  </ul>
-</p>
+<div><a href="registration.html">Job Registration</a></div>
 
-<h2>Registered Task Status</h2>
+<h2>Execute Your Task</h2>
 
-<div>
-  Status: <span id="status"><i class="fas fa-sync fa-spin"></i> fetching...</span>
+<div><a href="execution.html">Task Execution</a></div>
+
+<h2>Job Status</h2>
+
+<div id="status-wrapper">
+  Status:<br>
+  <span id="status"><i class="fas fa-sync fa-spin"></i> fetching...</span>
 </div>
 
 <!-- <table>
@@ -86,7 +91,7 @@
         changeStatus('ready for execution');
         break;
       case 'completed':
-        changeStatus('execution completed. <a href="./results">result</a>');
+        changeStatus('execution completed<br><a href="./results">result</a>');
         break;
       default:
         changeStatus(jobStatus);

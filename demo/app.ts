@@ -9,7 +9,9 @@ import * as cors from 'cors'; // Cross-Origin Resource Sharing
 import * as express from 'express';
 import * as log4js from 'log4js';
 
-import {Job, AbstractInputData, WasmMapper, WasmReducer, WasmWebServer} from 'madoop';
+import {Job, WasmMapper, WasmReducer, WasmWebServer} from 'madoop';
+import MyInputData from './MyInputData';
+import MyShuffler from './MyShuffler';
 
 const ROOT = '/demo';
 const PORT = 8000;
@@ -24,7 +26,7 @@ const job = new Job('demo');
 const server = new WasmWebServer();
 
 let jobStatus: string = 'unregistered';
-let jobResult: string = null;
+let jobResult: any = null;
 
 router.get('/status', (req, res): void => {
   logger.info('[GET] /status');
@@ -35,7 +37,8 @@ router.get('/status', (req, res): void => {
 
 router.get('/results', (req, res): void => {
   logger.info('[GET] /results');
-  res.send(jobResult);
+  // Currently job results are Map<any, any> object
+  res.send(JSON.stringify([...jobResult]));
 });
 
 router.post('/tasks', async (req, res): Promise<void> => {
@@ -75,42 +78,21 @@ router.post('/tasks', async (req, res): Promise<void> => {
     console.log(err);
     jobStatus = 'madoop server error';
   });
+  let serverInstance: http.Server = null;
   const mapper = new WasmMapper();
   mapper.setWasmJs(compiled[0]);
   mapper.setWasmBinary(compiled[1]);
   const reducer = new WasmReducer();
   reducer.setWasmJs(compiled[2]);
   reducer.setWasmBinary(compiled[3]);
-  class InputData extends AbstractInputData {
-    constructor() {
-      super();
-      const rawData = reqData['data'];
-      const data = rawData.split('\n');
-      const length = data.length;
-      const step = 40000; // 1 行につき平均約 1.1 KB
-      const dataElement: string[][] = [];
-      for (let i = 0; i < Math.floor(length / step); ++i) {
-        const begin = step * i;
-        const end = step * (i + 1);
-        dataElement.push(data.slice(begin, end));
-      }
-      dataElement.push(data.slice(step * Math.floor(length / step)));
-      for (let i = 0; i < dataElement.length; ++i) {
-        let line = '';
-        for (let j = 0; j < dataElement[i].length; ++j) {
-          line += dataElement[i][j] + '\n';
-        }
-        this.addInputData(line);
-      }
-    }
-  };
-  let serverInstance: http.Server = null;
-  const inputData = new InputData();
+  const inputData = new MyInputData(reqData['data']);
+  const shuffler = new MyShuffler();
   job.setInputData(inputData);
   job.setMapper(mapper);
+  job.setShuffler(shuffler);
   job.setReducer(reducer);
   job.setCallbackWhenCompleted(result => {
-    logger.info('Registered job has been completed.')
+    logger.info('Registered job has been completed.');
     jobResult = result;
     jobStatus = 'completed';
     serverInstance.close();
@@ -123,7 +105,6 @@ router.post('/tasks', async (req, res): Promise<void> => {
   jobStatus = 'ready';
   process.chdir(__dirname);
 });
-
 
 // Settings for CORS: Cross-Origin Resource Sharing
 app.use(cors());

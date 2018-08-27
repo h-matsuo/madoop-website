@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Task Execution | Demo | Madoop</title>
+  <style>
+    .warning {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Task Execution</h1>
+
+<p>
+  This page executes tasks registered to Madoop.
+  Check your console to see debug information.
+</p>
+
+<p class="warning">
+  WARNING: Your computer resources are used during your stay in this page.
+</p>
+
+<div>
+  <a href="./">Back to demo main page</a>
+</div>
+
+<script>
+  var MADOOP_MODE_DEBUG = true;
+  var MADOOP_SERVER_ENDPOINT_URL = '//localhost:5000/demo/server';
+  var MADOOP_PING_INTERVAL = 1000;
+</script>
+<script src="./wasm-madoop.min.js" async></script>
+
+</body>
+</html>
