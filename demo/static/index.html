@@ -14,13 +14,6 @@
       font-size: 2rem;
       font-weight: bold;
     }
-    table {
-      border-collapse: collapse;
-    }
-    th, td {
-    padding: 0 10px;
-    border: 1px solid #DDD;
-    }
   </style>
 </head>
 <body>
@@ -45,10 +38,6 @@
   Status:<br>
   <span id="status"><i class="fas fa-sync fa-spin"></i> fetching...</span>
 </div>
-
-<!-- <table>
-  <tr><th>Task ID</th><th>State</th><th>Details</th></tr>
-</table> -->
 
 <script>
 
@@ -102,20 +91,6 @@
     setInterval(updateStatus, 1000);
   });
 
-/*
-  $(document).ready(function () {
-    var ROUTE = '/madoop';
-    $.ajax({
-      url: `${ROUTE}/tasks`,
-      type: 'GET'
-    }).done(function (data, textStatus, jqXHR) {
-      data.reverse().forEach(function (element, index, ar) {
-        if (element === null) { return; }
-        $('table').append(`<tr><td>${element.taskId}</td><td>${element.status}</td><td>TODO</td></tr>`);
-      });
-    });
-  });
-  */
 </script>
 
 </body>
