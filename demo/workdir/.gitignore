@@ -1,0 +1,4 @@
+*.cpp
+*.js
+*.wasm
+!lib_emit_func.js

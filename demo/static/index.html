@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo | Madoop</title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/solid.css" integrity="sha384-wnAC7ln+XN0UKdcPvJvtqIH3jOjs9pnKnq9qX68ImXvOGz2JuFoEiCjT8jyZQX2z" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/fontawesome.css" integrity="sha384-HbmWTHay9psM8qyzEKPc8odH4DsOuzdejtnr+OFtDmOcIVnhgReQ4GZBH7uwcjf6" crossorigin="anonymous">
+  <style>
+    body {
+      padding: 10px;
+    }
+    table {
+      border-collapse: collapse;
+    }
+    th, td {
+    padding: 0 10px;
+    border: 1px solid #DDD;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Demo Page</h1>
+
+<p>
+  This is a demo page for <a href="https://github.com/h-matsuo/madoop">Madoop</a>.
+</p>
+
+<h2>Register Task</h2>
+
+<p>You can try to register your own task:
+  <ul>
+    <li><a href="register.html">Task Registration</a></li>
+  </ul>
+</p>
+
+<h2>Registered Task Status</h2>
+
+<div>
+  Status: <span id="status"><i class="fas fa-sync fa-spin"></i> fetching...</span>
+</div>
+
+<!-- <table>
+  <tr><th>Task ID</th><th>State</th><th>Details</th></tr>
+</table> -->
+
+<script>
+
+  // const SERVER_ENDPOINT = '//localhost:8000/demo';
+
+  // Handle 4xx, 5xx response when using Fetch API
+  // ref. https://blog.mudatobunka.org/entry/2016/04/26/092518
+  const fetchErrorHandler = res => {
+    if (!res.ok) {
+      throw Error(`${res.status} ${res.statusText}`);
+    }
+    return res;
+  };
+
+  const updateStatus = async () => {
+    const statusElement = document.getElementById('status');
+    const changeStatus = status => {
+      statusElement.innerHTML = status;
+    }
+    let jobStatus;
+    try {
+      const data = await fetch('./status', {
+        method: 'GET',
+        headers: new Headers({
+          'Pragma': 'no-cache',
+          'Cache-Control': 'no-cache'
+        })
+      }).then(fetchErrorHandler).then(res => res.json());
+      jobStatus = data.jobStatus;
+    } catch (e) {
+      changeStatus('<i class="fas fa-exclamation-triangle"></i> failed to fetch.');
+      console.error(e);
+      return;
+    }
+    switch (jobStatus) {
+      case 'compiling':
+        changeStatus('<i class="fas fa-spinner fa-pulse"></i> compiling...');
+        break;
+      case 'ready':
+        changeStatus('ready for execution');
+        break;
+      case 'completed':
+        changeStatus('execution completed. <a href="./results">result</a>');
+        break;
+      default:
+        changeStatus(jobStatus);
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    setInterval(updateStatus, 1000);
+  });
+
+/*
+  $(document).ready(function () {
+    var ROUTE = '/madoop';
+    $.ajax({
+      url: `${ROUTE}/tasks`,
+      type: 'GET'
+    }).done(function (data, textStatus, jqXHR) {
+      data.reverse().forEach(function (element, index, ar) {
+        if (element === null) { return; }
+        $('table').append(`<tr><td>${element.taskId}</td><td>${element.status}</td><td>TODO</td></tr>`);
+      });
+    });
+  });
+  */
+</script>
+
+</body>
+</html>
