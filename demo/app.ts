@@ -109,13 +109,15 @@ router.post('/tasks', async (req, res): Promise<void> => {
 // Settings for CORS: Cross-Origin Resource Sharing
 app.use(cors());
 
-// Settings for parsing JSON as request body
+// Settings for body-parser middleware
+app.use(bodyParser.json({
+  limit: '100mb', // to avoid status 413 (payload too large)
+  type: 'application/*+json'
+}));
 app.use(bodyParser.urlencoded({
   limit: '100mb', // to avoid `PayloadTooLargeError`
-  extended: true
-}));
-app.use(bodyParser.json({
-  limit: '100mb' // to avoid status 413 (payload too large)
+  extended: true,
+  type: 'application/x-www-form-urlencoded'
 }));
 
 app.use(ROOT, router);
