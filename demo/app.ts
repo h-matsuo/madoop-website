@@ -8,6 +8,7 @@ import * as bodyParser from 'body-parser';
 import * as cors from 'cors'; // Cross-Origin Resource Sharing
 import * as express from 'express';
 import * as log4js from 'log4js';
+import * as multer from 'multer';
 
 import {Job, WasmMapper, WasmReducer, WasmWebServer} from 'madoop';
 import MyInputData from './MyInputData';
@@ -20,6 +21,7 @@ const MADOOP_PORT = 5000;
 
 const app = express();
 const router = express.Router();
+const upload = multer();
 const logger = log4js.getLogger();
 
 const job = new Job('demo');
@@ -28,31 +30,15 @@ const server = new WasmWebServer();
 let jobStatus: string = 'unregistered';
 let jobResult: any = null;
 
-router.get('/status', (req, res): void => {
-  logger.info('[GET] /status');
-  res.send({
-    jobStatus: jobStatus
-  });
-});
-
-router.get('/results', (req, res): void => {
-  logger.info('[GET] /results');
-  // Currently job results are Map<any, any> object
-  res.send(JSON.stringify([...jobResult]));
-});
-
-router.post('/tasks', async (req, res): Promise<void> => {
-  logger.info('[POST] /tasks');
-  const reqData = req.body;
-  res.status(202).sendFile('./static/accepted.html', { root: __dirname });
+const setUpMadoop = async (mapSrc: string, reduceSrc: string, inputDataStr: string): Promise<void> => {
   jobStatus = 'compiling';
   process.chdir('./workdir');
 
   logger.info('Save `map.cpp` and `reduce.cpp`.');
   const writeFilePromise = util.promisify(fs.writeFile);
   await Promise.all([
-    writeFilePromise('map.cpp',    reqData['map-function-src']),
-    writeFilePromise('reduce.cpp', reqData['reduce-function-src'])
+    writeFilePromise('map.cpp',    mapSrc),
+    writeFilePromise('reduce.cpp', reduceSrc)
   ]).catch(err => {
     console.error(err);
   });
@@ -85,7 +71,7 @@ router.post('/tasks', async (req, res): Promise<void> => {
   const reducer = new WasmReducer();
   reducer.setWasmJs(compiled[2]);
   reducer.setWasmBinary(compiled[3]);
-  const inputData = new MyInputData(reqData['data']);
+  const inputData = new MyInputData(inputDataStr);
   const shuffler = new MyShuffler();
   job.setInputData(inputData);
   job.setMapper(mapper);
@@ -104,6 +90,36 @@ router.post('/tasks', async (req, res): Promise<void> => {
 
   jobStatus = 'ready';
   process.chdir(__dirname);
+};
+
+router.get('/status', (req, res): void => {
+  logger.info('[GET] /status');
+  res.send({
+    jobStatus: jobStatus
+  });
+});
+
+router.get('/results', (req, res): void => {
+  logger.info('[GET] /results');
+  // Currently job results are Map<any, any> object
+  res.send(JSON.stringify([...jobResult]));
+});
+
+router.post('/tasks', upload.single('data'), async (req, res): Promise<void> => {
+  logger.info('[POST] /tasks');
+  const mapSrc = req.body['map-function-src'];
+  const reduceSrc = req.body['reduce-function-src'];
+  let inputData: string = null;
+  if (req.is('application/x-www-form-urlencoded')) {
+    inputData = req.body['data'];
+  } else if (req.is('multipart/form-data')) {
+    inputData = req.file.buffer.toString();
+  } else {
+    res.status(400);
+    return;
+  }
+  res.status(202).sendFile('./static/accepted.html', { root: __dirname });
+  setUpMadoop(mapSrc, reduceSrc, inputData);
 });
 
 // Settings for CORS: Cross-Origin Resource Sharing
@@ -111,13 +127,11 @@ app.use(cors());
 
 // Settings for body-parser middleware
 app.use(bodyParser.json({
-  limit: '100mb', // to avoid status 413 (payload too large)
-  type: 'application/*+json'
+  limit: '100mb' // to avoid status 413 (payload too large)
 }));
 app.use(bodyParser.urlencoded({
   limit: '100mb', // to avoid `PayloadTooLargeError`
-  extended: true,
-  type: 'application/x-www-form-urlencoded'
+  extended: true
 }));
 
 app.use(ROOT, router);

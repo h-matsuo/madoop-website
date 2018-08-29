@@ -38,8 +38,12 @@
       resize: vertical;
       width: calc(100% - 1em);
     }
-    input {
+    input[type="file"] {
+      font-size: 1.5rem;
+    }
+    input:not([type="file"]) {
       font-size: 2rem;
+      margin-bottom: 10px;
     }
     .CodeMirror { /* OVERRIDE styles defined in "codemirror.min.css" */
       font-family: "Inconsolata", monospace;
@@ -51,7 +55,7 @@
 
 <h1>Job Registration</h1>
 
-<form action="/demo/tasks" method="post">
+<form action="/demo/tasks" method="post" enctype="multipart/form-data">
   <fieldset>
     <legend>Programming language</legend>
     <input type="radio" name="language" value="cpp" checked="checked"> C++
@@ -156,11 +160,7 @@ inline std::vector<std::string> split(const std::string &str, char sep)
   </fieldset>
   <fieldset>
     <legend>Input Data</legend>
-    <code>
-<textarea name="data">
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-</textarea>
-    </code>
+    <input type="file" name="data" required>
   </fieldset>
   <div><input type="submit" value="送信"> <input type="reset" value="リセット"></div>
 </form>
