@@ -12,7 +12,7 @@
     "cors": "^2.8.4",
     "express": "^4.16.3",
     "log4js": "^3.0.5",
-    "madoop": "git+ssh://git@github.com/h-matsuo/madoop.git",
+    "madoop": "git+ssh://git@github.com/h-matsuo/madoop.git#feebef0e6b221bc36049e34fc646840c77596745",
     "multer": "^1.3.1",
     "ts-node": "^7.0.1",
     "typescript": "^3.0.1"

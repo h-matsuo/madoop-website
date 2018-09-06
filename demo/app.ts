@@ -77,6 +77,10 @@ const setUpMadoop = async (mapSrc: string, reduceSrc: string, inputDataStr: stri
   job.setMapper(mapper);
   job.setShuffler(shuffler);
   job.setReducer(reducer);
+  job.setCallbackWhenAccessedFirstly(() => {
+    logger.info('Start executing registered job.');
+    jobStatus = 'executing';
+  });
   job.setCallbackWhenCompleted(result => {
     logger.info('Registered job has been completed.');
     jobResult = result;
