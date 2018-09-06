@@ -9,6 +9,8 @@ const fetchErrorHandler = res => {
   return res;
 };
 
+let previousJobStatus = null;
+
 const updateStatus = async () => {
 
   const statusElement = document.getElementsByClassName('c-status')[0];
@@ -66,6 +68,11 @@ const updateStatus = async () => {
     return;
   }
 
+  if (previousJobStatus == jobStatus) {
+    return;
+  }
+  previousJobStatus = jobStatus;
+
   switch (jobStatus) {
 
     case 'unregistered':
@@ -110,7 +117,10 @@ const updateStatus = async () => {
         <i class="fas fa-check-circle c-status__icon"></i>
         <span class="c-status__text">Execution completed</span>
       `);
-      updateStatusDescription('All tasks were successfully executed. Results are available <a href="./results" class="alert-link">here</a>.');
+      updateStatusDescription(`
+        All tasks were successfully executed.<br>
+        <a href="./results" class="btn btn-success btn-lg btn-block mt-2" role="button">Get Results</a>
+      `);
       showStatusInfo();
       break;
 
